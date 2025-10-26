@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "product", indexes = {
     @Index(name = "idx_product_brand_id", columnList = "brand_id"),
     @Index(name = "idx_product_created_at", columnList = "created_at DESC"),
+    @Index(name = "ft_product_name_info", columnList = "product_name,product_info")
 })
 >>>>>>> 3a8c688 (FDBD-43 ✨ feat[product]: 상품, 상품 옵션(값, 이름, 매핑) model + vo 생성.)
 @Getter
