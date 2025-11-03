@@ -27,9 +27,12 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     // 상품 ID로 상세 정보를 조회하고 필요한 연관을 순차적으로 초기화한다.
     @Override
     public Optional<Product> findDetailById(Long productId) {
+        // 1단계: Product와 Brand를 fetch join으로 조회
         TypedQuery<Product> query = entityManager.createQuery(
-            "select p from Product p " +
+            "select distinct p from Product p " +
                 "join fetch p.brand " +
+                "left join fetch p.productOptions po " +
+                "left join fetch po.inventory " +
                 "where p.productId = :productId",
             Product.class
         );
@@ -41,7 +44,24 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         }
 
         Product product = results.get(0);
-        initializeCollections(product);
+
+        // 2단계: ProductOptionValue와 연관된 OptionValue, OptionName을 fetch join으로 조회
+        if (!product.getProductOptions().isEmpty()) {
+            TypedQuery<ProductOption> optionQuery = entityManager.createQuery(
+                "select distinct po from ProductOption po " +
+                    "left join fetch po.productOptionValues pov " +
+                    "left join fetch pov.optionValue ov " +
+                    "left join fetch ov.optionName " +
+                    "where po.product.productId = :productId",
+                ProductOption.class
+            );
+            optionQuery.setParameter("productId", productId);
+            optionQuery.getResultList(); // 쿼리를 실행하여 영속성 컨텍스트에 로드
+        }
+
+        // 3단계: 이미지 초기화
+        Hibernate.initialize(product.getImages());
+
         return Optional.of(product);
     }
 
