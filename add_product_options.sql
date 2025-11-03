@@ -10,16 +10,17 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1. Inventory 레코드 추가
 -- inventory와 product_option은 양방향 1:1 관계이므로
 -- 두 테이블을 동시에 삽입해야 합니다
+-- AUTO_INCREMENT 값 사용: inventory(8, 9), product_option(14, 15)
 INSERT INTO inventory (inventory_id, product_option_id, is_available, value, stock_quantity, created_at, updated_at)
 VALUES
-  (6, 12, 1, 0, 100, NOW(), NOW()),  -- 사이즈 255용 재고
-  (7, 13, 1, 0, 120, NOW(), NOW());  -- 사이즈 260용 재고
+  (8, 14, 1, 0, 100, NOW(), NOW()),  -- 사이즈 255용 재고
+  (9, 15, 1, 0, 120, NOW(), NOW());  -- 사이즈 260용 재고
 
 -- 2. ProductOption 레코드 추가
 INSERT INTO product_option (product_option_id, product_id, product_price, inventory_id, created_at, updated_at)
 VALUES
-  (12, 5, 99000.00, 6, NOW(), NOW()),  -- 사이즈 255 옵션 (재고 inventory_id=6)
-  (13, 5, 99000.00, 7, NOW(), NOW());  -- 사이즈 260 옵션 (재고 inventory_id=7)
+  (14, 5, 99000.00, 8, NOW(), NOW()),  -- 사이즈 255 옵션 (재고 inventory_id=8)
+  (15, 5, 99000.00, 9, NOW(), NOW());  -- 사이즈 260 옵션 (재고 inventory_id=9)
 
 -- 외래 키 체크 다시 활성화
 SET FOREIGN_KEY_CHECKS = 1;
@@ -28,8 +29,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 각 product_option을 실제 option_value와 연결
 INSERT INTO product_option_value (product_option_id, option_value_id)
 VALUES
-  (12, 2),  -- product_option 12 → option_value 2 (사이즈: 255)
-  (13, 3);  -- product_option 13 → option_value 3 (사이즈: 260)
+  (14, 2),  -- product_option 14 → option_value 2 (사이즈: 255)
+  (15, 3);  -- product_option 15 → option_value 3 (사이즈: 260)
 
 -- ====================================================================
 -- 검증 쿼리
