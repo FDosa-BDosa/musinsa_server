@@ -1,5 +1,6 @@
 package com.mudosa.musinsa.product.presentation.controller;
 
+import com.mudosa.musinsa.common.dto.ApiResponse;
 import com.mudosa.musinsa.product.application.CartService;
 import com.mudosa.musinsa.product.application.dto.CartItemCreateRequest;
 import com.mudosa.musinsa.product.application.dto.CartItemDetailResponse;
@@ -31,34 +32,33 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public ResponseEntity<List<CartItemDetailResponse>> getCartItems(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ApiResponse<List<CartItemDetailResponse>>> getCartItems(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
         List<CartItemDetailResponse> response = cartService.getCartItems(userId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping
-    public ResponseEntity<CartItemResponse> addCartItem(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<ApiResponse<CartItemResponse>> addCartItem(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                         @Valid @RequestBody CartItemCreateRequest request) {
         Long userId = userDetails.getUserId();
         CartItemResponse response = cartService.addCartItem(userId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
     }
 
     @PatchMapping("/{cartItemId}")
-    public ResponseEntity<CartItemResponse> updateCartItem(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<ApiResponse<CartItemResponse>> updateCartItem(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @PathVariable Long cartItemId,
                                                            @Valid @RequestBody CartItemUpdateRequest request) {
         Long userId = userDetails.getUserId();
         CartItemResponse response = cartService.updateCartItemQuantity(userId, cartItemId, request.getQuantity());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @DeleteMapping("/{cartItemId}")
-    public ResponseEntity<Void> deleteCartItem(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                               @PathVariable Long cartItemId) {
+    public ResponseEntity<ApiResponse<Void>> deleteCartItem(@AuthenticationPrincipal CustomUserDetails userDetails,                                               @PathVariable Long cartItemId) {
         Long userId = userDetails.getUserId();
         cartService.deleteCartItem(userId, cartItemId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success(null, "장바구니 상품이 삭제되었습니다."));
     }
 }

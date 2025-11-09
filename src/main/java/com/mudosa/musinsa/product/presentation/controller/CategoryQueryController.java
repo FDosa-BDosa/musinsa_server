@@ -1,5 +1,6 @@
 package com.mudosa.musinsa.product.presentation.controller;
 
+import com.mudosa.musinsa.common.dto.ApiResponse;
 import com.mudosa.musinsa.product.domain.model.Category;
 import com.mudosa.musinsa.product.domain.repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,15 +25,15 @@ public class CategoryQueryController {
     private final CategoryRepository categoryRepository;
 
     @GetMapping("/{categoryId}/path")
-    public ResponseEntity<CategoryPathResponse> getCategoryPath(@PathVariable Long categoryId) {
+    public ResponseEntity<ApiResponse<CategoryPathResponse>> getCategoryPath(@PathVariable Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new EntityNotFoundException("Category not found: " + categoryId));
 
-    return ResponseEntity.ok(new CategoryPathResponse(categoryId, category.buildPath()));
+    return ResponseEntity.ok(ApiResponse.success(new CategoryPathResponse(categoryId, category.buildPath())));
     }
 
     @GetMapping("/tree")
-    public ResponseEntity<CategoryTreeResponse> getCategoryTree() {
+    public ResponseEntity<ApiResponse<CategoryTreeResponse>> getCategoryTree() {
         List<Category> allCategories = categoryRepository.findAll();
         
         // 부모 카테고리만 필터링 (parent가 null인 것들)
@@ -53,7 +54,7 @@ public class CategoryQueryController {
             })
             .collect(Collectors.toList());
         
-        return ResponseEntity.ok(new CategoryTreeResponse(categoryNodes));
+        return ResponseEntity.ok(ApiResponse.success(new CategoryTreeResponse(categoryNodes)));
     }
 
     @Value

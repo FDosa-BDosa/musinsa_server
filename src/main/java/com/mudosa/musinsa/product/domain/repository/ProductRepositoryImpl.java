@@ -54,13 +54,22 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         // 페이징 적용
         int totalElements = countTotalElements(cb, categoryPaths, gender, keyword, brandId);
         
-        jakarta.persistence.TypedQuery<Product> query = entityManager.createQuery(cq);
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
-
-        List<Product> content = query.getResultList();
+        List<Product> content;
+        if (pageable.isUnpaged()) {
+            // Unpaged인 경우 모든 결과를 반환
+            content = entityManager.createQuery(cq).getResultList();
+        } else {
+            // 페이징이 있는 경우
+            jakarta.persistence.TypedQuery<Product> query = entityManager.createQuery(cq);
+            query.setFirstResult((int) pageable.getOffset());
+            query.setMaxResults(pageable.getPageSize());
+            content = query.getResultList();
+        }
+        
         return new PageImpl<>(content, pageable, totalElements);
     }
+
+
 
     // 공통 검색 조건 빌드
     private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<Product> product,
@@ -103,8 +112,55 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
             predicates.add(cb.equal(product.get("brand").get("brandId"), brandId));
         }
 
-        // 항상 판매 가능 상품만 조회한다.
-        predicates.add(cb.isTrue(product.get("isAvailable")));
+        // 일반 사용자용 조회에서만 판매 가능 상품 필터링
+        // 관리자용 조회에서는 isAvailable 필터를 제외하여 모든 상품 표시
+        // predicates.add(cb.isTrue(product.get("isAvailable"))); // 주석 처리
+
+        return predicates;
+    }
+
+    // 관리자용 검색 조건 빌드 (비활성화 상품 포함)
+    private List<Predicate> buildPredicatesForAdmin(CriteriaBuilder cb, Root<Product> product,
+                                                   List<String> categoryPaths, ProductGenderType gender,
+                                                   String keyword, Long brandId) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (gender != null) {
+            Expression<ProductGenderType> genderPath = product.get("productGenderType");
+            predicates.add(cb.equal(genderPath, gender));
+        }
+
+        if (categoryPaths != null && !categoryPaths.isEmpty()) {
+            Expression<String> categoryPathExpression = product.get("categoryPath");
+            List<Predicate> categoryPredicates = new ArrayList<>();
+            for (String path : categoryPaths) {
+                Predicate exactMatch = cb.equal(categoryPathExpression, path);
+                Predicate childMatch = cb.like(categoryPathExpression, path + "/%");
+                categoryPredicates.add(cb.or(exactMatch, childMatch));
+            }
+            predicates.add(cb.or(categoryPredicates.toArray(new Predicate[0])));
+        }
+
+        if (keyword != null && !keyword.isBlank()) {
+            String lowered = "%" + keyword.toLowerCase() + "%";
+            Expression<String> namePath = cb.lower(product.get("productName"));
+            Expression<String> infoPath = cb.lower(product.get("productInfo"));
+            Expression<String> brandNamePath = cb.lower(product.get("brandName"));
+            Expression<String> categoryPathExpr = cb.lower(product.get("categoryPath"));
+
+            Predicate nameLike = cb.like(namePath, lowered);
+            Predicate infoLike = cb.like(infoPath, lowered);
+            Predicate brandLike = cb.like(brandNamePath, lowered);
+            Predicate categoryLike = cb.like(categoryPathExpr, lowered);
+
+            predicates.add(cb.or(nameLike, infoLike, brandLike, categoryLike));
+        }
+
+        if (brandId != null) {
+            predicates.add(cb.equal(product.get("brand").get("brandId"), brandId));
+        }
+
+        // 관리자용 조회에서는 isAvailable 필터를 적용하지 않음 (모든 상품 표시)
 
         return predicates;
     }
@@ -156,6 +212,61 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         Root<Product> countRoot = countQuery.from(Product.class);
         
         List<Predicate> predicates = buildPredicates(cb, countRoot, categoryPaths, gender, keyword, brandId);
+        
+        countQuery.select(cb.countDistinct(countRoot));
+        if (!predicates.isEmpty()) {
+            countQuery.where(cb.and(predicates.toArray(new Predicate[0])));
+        }
+        
+        return entityManager.createQuery(countQuery).getSingleResult().intValue();
+    }
+
+    @Override
+    public Page<Product> findAllByFiltersWithPaginationForAdmin(List<String> categoryPaths,
+                                                               ProductGenderType gender,
+                                                               String keyword,
+                                                               Long brandId,
+                                                               ProductSearchCondition.PriceSort priceSort,
+                                                               Pageable pageable) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+        Root<Product> product = cq.from(Product.class);
+
+        // 관리자용 검색 조건 빌드 (비활성화 상품 포함)
+        List<Predicate> predicates = buildPredicatesForAdmin(cb, product, categoryPaths, gender, keyword, brandId);
+
+        // 조건 적용
+        if (!predicates.isEmpty()) {
+            cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        }
+
+        // 정렬 조건 적용
+        applySorting(cb, cq, product, priceSort, pageable);
+
+        // 쿼리 실행
+        jakarta.persistence.TypedQuery<Product> query = entityManager.createQuery(cq);
+
+        // 페이징 적용
+        int pageNumber = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        query.setFirstResult(pageNumber * pageSize);
+        query.setMaxResults(pageSize);
+
+        List<Product> content = query.getResultList();
+
+        // 전체 개수 계산 (관리자용)
+        int totalElements = countTotalElementsForAdmin(cb, categoryPaths, gender, keyword, brandId);
+
+        return new org.springframework.data.domain.PageImpl<>(content, pageable, totalElements);
+    }
+
+    // 관리자용 전체 개수 계산
+    private int countTotalElementsForAdmin(CriteriaBuilder cb, List<String> categoryPaths,
+                                          ProductGenderType gender, String keyword, Long brandId) {
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Product> countRoot = countQuery.from(Product.class);
+        
+        List<Predicate> predicates = buildPredicatesForAdmin(cb, countRoot, categoryPaths, gender, keyword, brandId);
         
         countQuery.select(cb.countDistinct(countRoot));
         if (!predicates.isEmpty()) {

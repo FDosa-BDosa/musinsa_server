@@ -74,4 +74,38 @@ public class ProductQueryService {
 	return ProductQueryMapper.toProductDetail(product);
 	}
 
+	/**
+	 * 관리자용 상품 목록 조회 (비활성화 상품 포함)
+	 */
+	public ProductSearchResponse searchProductsForAdmin(ProductSearchCondition condition) {
+		// 1. 검색 조건 파싱
+		Pageable pageable = condition != null ? condition.getPageable() : Pageable.unpaged();
+		ProductGenderType gender = condition != null ? condition.getGender() : null;
+		String keyword = condition != null ? condition.getKeyword() : null;
+		Long brandId = condition != null ? condition.getBrandId() : null;
+		ProductSearchCondition.PriceSort priceSort = condition != null ? condition.getPriceSort() : null;
+		List<String> categoryPaths = condition != null ? condition.getCategoryPaths() : Collections.emptyList();
+
+		// 2. 데이터베이스 레벨에서 필터링, 정렬, 페이징 수행 (관리자용)
+		Page<Product> page = productRepository.findAllByFiltersWithPaginationForAdmin(
+			categoryPaths, gender, keyword, brandId, priceSort, pageable);
+
+		// 3. 응답 DTO 변환
+		List<ProductSearchResponse.ProductSummary> summaries = page.getContent().stream()
+			.map(ProductQueryMapper::toProductSummary)
+			.collect(Collectors.toList());
+
+		int pageNumber = pageable.isPaged() ? pageable.getPageNumber() : 0;
+		int pageSize = pageable.isPaged() ? pageable.getPageSize() : summaries.size();
+		int totalPages = page.getTotalPages();
+
+		return ProductSearchResponse.builder()
+			.products(summaries)
+			.totalElements(page.getTotalElements())
+			.totalPages(totalPages)
+			.page(pageNumber)
+			.size(pageSize)
+			.build();
 	}
+
+}

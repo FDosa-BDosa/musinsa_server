@@ -1,5 +1,6 @@
 package com.mudosa.musinsa.product.presentation.controller;
 
+import com.mudosa.musinsa.common.dto.ApiResponse;
 import com.mudosa.musinsa.product.application.ProductQueryService;
 import com.mudosa.musinsa.product.application.dto.ProductDetailResponse;
 import com.mudosa.musinsa.product.application.dto.ProductSearchRequest;
@@ -22,15 +23,15 @@ public class ProductQueryController {
 
     // 검색 조건을 받아 상품 목록을 조회한다.
     @GetMapping
-    public ResponseEntity<ProductSearchResponse> searchProducts(@Valid ProductSearchRequest request) {
+    public ResponseEntity<ApiResponse<ProductSearchResponse>> searchProducts(@Valid ProductSearchRequest request) {
         ProductSearchResponse response = productService.searchProducts(request.toCondition());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 상품 식별자를 기준으로 상세 정보를 조회한다.
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Long productId) {
+    public ResponseEntity<ApiResponse<ProductDetailResponse>> getProductDetail(@PathVariable Long productId) {
         ProductDetailResponse response = productService.getProductDetail(productId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

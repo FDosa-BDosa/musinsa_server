@@ -18,4 +18,12 @@ public interface ProductRepositoryCustom {
                                                 Long brandId,
                                                 ProductSearchCondition.PriceSort priceSort,
                                                 Pageable pageable);
+
+    // 관리자용 상품 목록 조회 (비활성화 상품 포함)
+    Page<Product> findAllByFiltersWithPaginationForAdmin(List<String> categoryPaths,
+                                                       ProductGenderType gender,
+                                                       String keyword,
+                                                       Long brandId,
+                                                       ProductSearchCondition.PriceSort priceSort,
+                                                       Pageable pageable);
 }
