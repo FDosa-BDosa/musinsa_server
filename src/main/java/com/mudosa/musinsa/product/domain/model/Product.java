@@ -15,7 +15,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 //크롤링을 위한 임시
-@Table(name = "product")
+@Table(name = "product",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"product_info", "category_path"},
+                        name = "uk_product_info_category")
+        })
 public class Product extends BaseEntity {
 
     @Id
