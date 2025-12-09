@@ -5,6 +5,7 @@ import com.mudosa.musinsa.chat.repository.ChatPartRepository;
 import com.mudosa.musinsa.fbtoken.service.FirebaseTokenService;
 import com.mudosa.musinsa.notification.dto.NotificationDTO;
 import com.mudosa.musinsa.notification.event.ChatNotificationCreatedEvent;
+import com.mudosa.musinsa.notification.event.CreateNotificationEvent;
 import com.mudosa.musinsa.notification.model.Notification;
 import com.mudosa.musinsa.notification.model.NotificationMetadata;
 import com.mudosa.musinsa.notification.repository.NotificationMetadataRepository;
@@ -80,9 +81,9 @@ public class NotificationService {
   }
 
   @Transactional
-  public Notification createNotification(Long userId, Long notificationMetadataId) {
-      User user = userRepository.findById(userId).orElseThrow(()->new NoSuchElementException("No such User not found"));
-      NotificationMetadata notificationMetadata = notificationMetadataRepository.findById(notificationMetadataId).orElseThrow(()->new NoSuchElementException("No such Notification Metadata not found"));
+  public Notification createNotification(CreateNotificationEvent event) {
+      User user = userRepository.findById(event.userId()).orElseThrow(()->new NoSuchElementException("No such User not found"));
+      NotificationMetadata notificationMetadata = notificationMetadataRepository.findById(event.notificationMetadataId()).orElseThrow(()->new NoSuchElementException("No such Notification Metadata not found"));
       Notification notification = Notification.builder()
               .notificationTitle(notificationMetadata.getNotificationTitle())
               .notificationMetadata(notificationMetadata)

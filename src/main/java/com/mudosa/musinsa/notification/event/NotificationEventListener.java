@@ -21,6 +21,6 @@ public class NotificationEventListener {
 
     @TransactionalEventListener(phase=TransactionPhase.AFTER_COMMIT)
     public void CreateNotificationHandle(CreateNotificationEvent event){
-
+        notificationService.createNotification(event);
     }
 }
