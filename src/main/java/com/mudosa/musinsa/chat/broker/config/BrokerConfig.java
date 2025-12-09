@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BrokerConfig {
 
-  @Value("${app.broker.type:rabbit}")
+  @Value("${app.broker.type:simple}")
   private String brokerType;
 
   @Bean

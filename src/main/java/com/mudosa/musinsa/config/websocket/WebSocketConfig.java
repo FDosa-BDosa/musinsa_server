@@ -17,7 +17,7 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-  @Value("${spring.rabbitmq.host}")
+  @Value("${spring.rabbitmq.host:rabbitmq}")
   public String rabbitHost;
 
   @Override
@@ -39,15 +39,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
-    config.enableStompBrokerRelay("/topic", "/queue")
-        .setRelayHost(rabbitHost)
-        .setRelayPort(61613)
-        .setClientLogin("guest")
-        .setClientPasscode("guest")
-        .setSystemLogin("guest")
-        .setSystemPasscode("guest")
-        .setSystemHeartbeatReceiveInterval(0)
-        .setSystemHeartbeatSendInterval(0)
+//    config.enableStompBrokerRelay("/topic", "/queue")
+//        .setRelayHost(rabbitHost)
+//        .setRelayPort(61613)
+//        .setClientLogin("guest")
+//        .setClientPasscode("guest")
+//        .setSystemLogin("guest")
+//        .setSystemPasscode("guest")
+//        .setSystemHeartbeatReceiveInterval(0)
+//        .setSystemHeartbeatSendInterval(0)
     ;
 
     config.setApplicationDestinationPrefixes("/app");
