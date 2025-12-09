@@ -18,4 +18,9 @@ public class NotificationEventListener {
     public void handle(ChatNotificationCreatedEvent event){
         notificationService.createChatNotification(event);
     }
+
+    @TransactionalEventListener(phase=TransactionPhase.AFTER_COMMIT)
+    public void CreateNotificationHandle(CreateNotificationEvent event){
+
+    }
 }

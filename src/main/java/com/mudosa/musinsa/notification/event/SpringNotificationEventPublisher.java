@@ -10,10 +10,16 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @Component
 public class SpringNotificationEventPublisher implements NotificationEventPublisher {
-  private final ApplicationEventPublisher eventPublisher;
 
-  @Override
-  public void publishChatNotificationCreatedEvent(MessageResponse dto) {
+    private final ApplicationEventPublisher eventPublisher;
+
+    @Override
+    public void publishChatNotificationCreatedEvent(MessageResponse dto) {
     eventPublisher.publishEvent(new ChatNotificationCreatedEvent(dto));
-  }
+    }
+
+    @Override
+    public void publishCreateNotificationEvent(Long userId, Long notificationMetadataId) {
+        eventPublisher.publishEvent(new CreateNotificationEvent(userId, notificationMetadataId));
+    }
 }

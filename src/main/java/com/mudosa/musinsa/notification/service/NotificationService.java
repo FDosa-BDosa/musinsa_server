@@ -9,6 +9,8 @@ import com.mudosa.musinsa.notification.model.Notification;
 import com.mudosa.musinsa.notification.model.NotificationMetadata;
 import com.mudosa.musinsa.notification.repository.NotificationMetadataRepository;
 import com.mudosa.musinsa.notification.repository.NotificationRepository;
+import com.mudosa.musinsa.user.domain.model.User;
+import com.mudosa.musinsa.user.domain.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -30,6 +33,7 @@ public class NotificationService {
   private final FcmService fcmService;
   private final FirebaseTokenService firebaseTokenService;
   private final ChatPartRepository chatPartRepository;
+  private final UserRepository userRepository;
 
   private final String CHAT_METADATA_CATEGORY = "CHAT";
   private final String MESSAGE_FROM_CHAT_ROOM = "채팅방에서 메세지가 왔습니다.";
@@ -41,6 +45,7 @@ public class NotificationService {
     return notificationRepository.findNotificationDTOsByUserId(userId, pageable);
   }
 
+  @Transactional
   public List<Notification> createChatNotification(ChatNotificationCreatedEvent chatNotificationCreatedEvent) {
 
     List<ChatPart> chatPartList = chatPartRepository.findChatPartsExcludingUser(chatNotificationCreatedEvent.getUserId(), chatNotificationCreatedEvent.getChatId());
@@ -75,7 +80,22 @@ public class NotificationService {
   }
 
   @Transactional
-  public int updateNotificationState(Long notificationId) {
+  public Notification createNotification(Long userId, Long notificationMetadataId) {
+      User user = userRepository.findById(userId).orElseThrow(()->new NoSuchElementException("No such User not found"));
+      NotificationMetadata notificationMetadata = notificationMetadataRepository.findById(notificationMetadataId).orElseThrow(()->new NoSuchElementException("No such Notification Metadata not found"));
+      Notification notification = Notification.builder()
+              .notificationTitle(notificationMetadata.getNotificationTitle())
+              .notificationMetadata(notificationMetadata)
+              .notificationMessage(notificationMetadata.getNotificationMessage())
+              .notificationUrl(notificationMetadata.getNotificationUrl())
+              .notificationStatus(false)
+              .user(user)
+              .build();
+      return notificationRepository.save(notification);
+  }
+
+  @Transactional
+  public Integer updateNotificationState(Long notificationId) {
     return notificationRepository.updateNotificationStatus(notificationId);
   }
 
