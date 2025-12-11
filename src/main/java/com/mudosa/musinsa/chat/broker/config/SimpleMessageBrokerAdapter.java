@@ -1,4 +1,4 @@
-package com.mudosa.musinsa.chat.broker;
+package com.mudosa.musinsa.chat.broker.config;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;

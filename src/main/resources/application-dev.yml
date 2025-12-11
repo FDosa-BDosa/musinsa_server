@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME}
+    url: jdbc:mysql://localhost:3306/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   kafka:
@@ -25,7 +25,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -33,8 +33,8 @@ spring:
 tosspayments:
   secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
   client-key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
-  confirm_url: ${TOSS_CONFIRM_URL}
-  base_cancel_url: ${TOSS_CANCEL_URL}
+  confirm_url: http://localhost:8080/dummy-toss-confirm
+  base_cancel_url: http://localhost:8080/dummy-toss-fail
 
 fcm:
   service-account-file: key/fdbdproject.json
@@ -50,12 +50,17 @@ aws:
 server:
   port: 8080
   address: 0.0.0.0
+  tomcat:
+    max-connections: 50000
+    accept-count: 4096
+    threads:
+      max: 400
 
 management:
   endpoints:
     web:
       exposure:
-        include: prometheus, health, info
+        include: prometheus, health, info, env
 
   tracing:
     enabled: true
@@ -69,12 +74,14 @@ management:
 
 logging:
   level:
-    org:
-      hibernate:
-        sql: debug
-        type.descriptor.sql.BasicBinder: TRACE
-        orm.jdbc.internal.LogicalConnectionImpl: DEBUG
-      springframework.orm.jpa: DEBUG
-      springframework.transaction: DEBUG
-      springframework.web.client.RestTemplate: DEBUG
-      com.mudosa.musinsa.common.client: DEBUG
+    root: warn
+#    org:
+#      hibernate:
+#        sql: debug
+#        type.descriptor.sql.BasicBinder: TRACE
+#        orm.jdbc.internal.LogicalConnectionImpl: DEBUG
+#      springframework.orm.jpa: DEBUG
+#      springframework.transaction: DEBUG
+#      springframework.web.client.RestTemplate: DEBUG
+#      com.mudosa.musinsa.common.client: DEBUG
+

@@ -1,4 +1,4 @@
-package com.mudosa.musinsa.chat.broker;
+package com.mudosa.musinsa.chat.broker.config;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

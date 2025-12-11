@@ -1,4 +1,4 @@
-package com.mudosa.musinsa.chat.broker;
+package com.mudosa.musinsa.chat.broker.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

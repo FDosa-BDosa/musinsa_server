@@ -1,4 +1,4 @@
-package com.mudosa.musinsa.chat.broker;
+package com.mudosa.musinsa.chat.broker.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;

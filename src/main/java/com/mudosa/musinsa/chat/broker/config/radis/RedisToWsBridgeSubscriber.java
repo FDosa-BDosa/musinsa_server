@@ -2,8 +2,8 @@ package com.mudosa.musinsa.chat.broker.config.radis;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mudosa.musinsa.chat.dto.WSFileUploadSuccessDTO;
-import com.mudosa.musinsa.chat.dto.WSMessageResponseDTO;
+import com.mudosa.musinsa.chat.dto.wsDto.WSFileUploadSuccessDTO;
+import com.mudosa.musinsa.chat.dto.wsDto.WSMessageResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

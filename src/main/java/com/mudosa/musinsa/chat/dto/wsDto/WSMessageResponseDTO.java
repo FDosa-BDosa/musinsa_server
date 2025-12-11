@@ -1,7 +1,10 @@
-package com.mudosa.musinsa.chat.dto;
+package com.mudosa.musinsa.chat.dto.wsDto;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.mudosa.musinsa.chat.dto.AttachmentResponse;
+import com.mudosa.musinsa.chat.dto.ParentMessageResponse;
 import com.mudosa.musinsa.chat.entity.Message;
 import com.mudosa.musinsa.chat.entity.MessageAttachment;
 import com.mudosa.musinsa.chat.enums.MessageStatus;
@@ -19,7 +22,7 @@ import java.util.List;
 @Schema(description = "Message Response Dto")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WSMessageResponseDTO {
-  private String type = "MESSAGE";
+  private String type;
 
   @Schema(description = "메시지 id", example = "1")
   private Long messageId;
@@ -32,6 +35,7 @@ public class WSMessageResponseDTO {
   @Schema(description = "메시지 내용", example = "안녕하세요!")
   private String content;
   @Schema(description = "보낸 시간", example = "2025-11-04T13:56:25.623Z")
+  @JsonFormat(shape = JsonFormat.Shape.STRING)
   private LocalDateTime createdAt;
 
   @Schema(description = "답장 메시지")

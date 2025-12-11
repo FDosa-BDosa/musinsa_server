@@ -1,4 +1,4 @@
-package com.mudosa.musinsa.chat.broker;
+package com.mudosa.musinsa.chat.broker.config;
 
 public interface ChatMessageBroker {
   /**

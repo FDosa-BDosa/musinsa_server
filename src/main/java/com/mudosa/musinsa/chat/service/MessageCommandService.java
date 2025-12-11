@@ -1,6 +1,6 @@
 package com.mudosa.musinsa.chat.service;
 
-import com.mudosa.musinsa.chat.dto.WSMessageResponseDTO;
+import com.mudosa.musinsa.chat.dto.wsDto.WSMessageResponseDTO;
 import com.mudosa.musinsa.chat.entity.Message;
 import com.mudosa.musinsa.chat.event.ChatEventPublisher;
 import com.mudosa.musinsa.chat.repository.MessageRepository;

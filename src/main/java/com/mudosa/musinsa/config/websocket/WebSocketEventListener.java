@@ -3,7 +3,6 @@ package com.mudosa.musinsa.config.websocket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
@@ -20,8 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @RequiredArgsConstructor
 public class WebSocketEventListener {
-
-  private final SimpMessageSendingOperations messagingTemplate;
 
   // 세션 ID와 사용자 정보를 매핑
   private final Map<String, Long> sessionUserMap = new ConcurrentHashMap<>();

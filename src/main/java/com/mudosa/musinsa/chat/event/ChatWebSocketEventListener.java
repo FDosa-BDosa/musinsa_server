@@ -1,6 +1,6 @@
 package com.mudosa.musinsa.chat.event;
 
-import com.mudosa.musinsa.chat.broker.ChatMessageBroker;
+import com.mudosa.musinsa.chat.service.ChatMessagePublishService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,17 +11,15 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 public class ChatWebSocketEventListener {
-  private final ChatMessageBroker chatMessageBroker;
 
-  /**
-   * DB 트랜잭션이 안전하게 커밋된 후에만 클라이언트에게 전송
-   */
+  private final ChatMessagePublishService publisher;
+
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void handleBroadcast(ChatBroadcastEvent event) {
-    String destination = "/topic/chat." + event.chatId();
 
-    log.debug("[WSEvent] 브로드캐스트 전송 -> dest={}, payload={}", destination, event.payload());
+    // Worker가 이 메시지를 fan-out 하게 됨
+    publisher.publishChatMessage(event.chatId(), event.payload());
 
-    chatMessageBroker.sendToTopic(destination, event.payload());
+    log.debug("[WSEvent] 메시지 큐 전송 -> chatId={}, payload={}", event.chatId(), event.payload());
   }
 }

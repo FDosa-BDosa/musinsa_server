@@ -1,11 +1,9 @@
 package com.mudosa.musinsa.chat.broker.config.rabbitmq;
 
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,13 +12,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMqConfig {
+
   @Value("${spring.rabbitmq.host:localhost}")
   private String rabbitHost;
 
-  @Bean
-  public TopicExchange chatExchange() {
-    return new TopicExchange("chat", true, false);
-  }
+
+  // ----------------------------------------
+  // 2) Connection Factory
+  // ----------------------------------------
 
   @Bean
   public CachingConnectionFactory connectionFactory() {
@@ -30,37 +29,55 @@ public class RabbitMqConfig {
     factory.setUsername("guest");
     factory.setPassword("guest");
 
-    // Publisher Confirm
     factory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
 
     return factory;
   }
 
+  // ----------------------------------------
+  // 3) Message Converter (Jackson)
+  // ----------------------------------------
+
   @Bean
-  public MessageConverter jacksonMessageConverter() {
+  public MessageConverter jsonMessageConverter() {
     return new Jackson2JsonMessageConverter();
   }
 
+  // ----------------------------------------
+  // 4) Producer (RabbitTemplate)
+  // ----------------------------------------
+
   @Bean
-  public RabbitTemplate rabbitTemplate(CachingConnectionFactory connectionFactory,
+  public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
                                        MessageConverter messageConverter) {
     RabbitTemplate template = new RabbitTemplate(connectionFactory);
-    template.setMessageConverter(messageConverter);   // JSON 직렬화
-    template.setExchange("chat");                     // 필요하면 기본 exchange 지정
+    template.setMessageConverter(messageConverter);
     return template;
   }
 
-  @Bean
-  public Queue defaultQueue() {
-    return new Queue("chat.default", true);
-  }
+  // ----------------------------------------
+  // 5) Consumer Listener Container
+  // ----------------------------------------
 
   @Bean
-  public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(CachingConnectionFactory connectionFactory) {
+  public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+      ConnectionFactory connectionFactory,
+      MessageConverter messageConverter
+  ) {
     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
     factory.setConnectionFactory(connectionFactory);
-    factory.setConcurrentConsumers(2);
-    factory.setMaxConcurrentConsumers(10);
+    factory.setMessageConverter(messageConverter);
+    // 동시 컨슈머 개수
+    factory.setConcurrentConsumers(8);
+    factory.setMaxConcurrentConsumers(16);
+
+    // QoS
+    factory.setPrefetchCount(20);
+
+    // 예외 발생 시 재큐 안 하고 바로 reject (DLX 쓰면 거기로 보냄)
+    factory.setDefaultRequeueRejected(false);
+
+    factory.setMissingQueuesFatal(false);
     return factory;
   }
 }

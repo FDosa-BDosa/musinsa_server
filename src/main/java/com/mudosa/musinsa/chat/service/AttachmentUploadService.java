@@ -1,7 +1,7 @@
 package com.mudosa.musinsa.chat.service;
 
 import com.mudosa.musinsa.chat.dto.AttachmentResponse;
-import com.mudosa.musinsa.chat.dto.WSFileUploadSuccessDTO;
+import com.mudosa.musinsa.chat.dto.wsDto.WSFileUploadSuccessDTO;
 import com.mudosa.musinsa.chat.entity.Message;
 import com.mudosa.musinsa.chat.entity.MessageAttachment;
 import com.mudosa.musinsa.chat.event.ChatEventPublisher;
@@ -41,9 +41,7 @@ public class AttachmentUploadService {
    */
   public void saveAttachments(Long messageId, List<TempUploadedFile> files, String clientMessageId) {
     // 0. 파일이 없으면 SKIP!
-    if (files == null || files.isEmpty()) {
-      return;
-    }
+    if (files == null || files.isEmpty()) return;
 
     Message message = messageRepository.findById(messageId)
         .orElseThrow(() -> new BusinessException(ErrorCode.MESSAGE_NOT_FOUND));
@@ -81,9 +79,7 @@ public class AttachmentUploadService {
         .map(file -> fileStore.storeMessageFile(message.getChatId(), message.getMessageId(), file)
             .thenApply(storedUrl -> MessageAttachment.create(message, file, storedUrl))
             // 개별 파일 업로드 실패 시 null 반환 (전체 로직 중단 방지)
-            .exceptionally(ex -> {
-              return null;
-            })
+            .exceptionally(ex -> null)
         )
         .toList();
 
@@ -119,7 +115,7 @@ public class AttachmentUploadService {
     // 4. 저장된 파일 목록 dto로 변경
     WSFileUploadSuccessDTO dto = WSFileUploadSuccessDTO.of(message, responses);
 
-    // 5. 웹소켓 전송 (성공한 파일 목록)
+    // 5. rabbitMQ로 전송 (성공한 파일 목록)
     chatEventPublisher.publishBroadcastEvent(dto.getChatId(), dto);
   }
 
@@ -139,7 +135,7 @@ public class AttachmentUploadService {
     // 2. 저장된 파일 목록 dto로 변경
     WSFileUploadSuccessDTO dto = WSFileUploadSuccessDTO.of(message, List.of());
 
-    // 3. 웹소켓 전송 (빈 배열)
+    // 3. rabbitMQ로 전송 (빈 배열)
     chatEventPublisher.publishBroadcastEvent(dto.getChatId(), dto);
   }
 }
