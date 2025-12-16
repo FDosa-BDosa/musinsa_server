@@ -4,6 +4,20 @@ spring:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+<<<<<<< Updated upstream
+=======
+    hikari:
+      # Dev default: tuned for laptop load-test without overloading local DB.
+      # Override per-machine via env vars if needed.
+      maximum-pool-size: ${DB_POOL_MAX:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:10}
+      idle-timeout: 300000
+      max-lifetime: 1700000
+      connection-timeout: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: ${DB_POOL_LEAK_DETECT_MS:0}
+
+>>>>>>> Stashed changes
   kafka:
     bootstrap-servers: localhost:9092
   rabbitmq:
@@ -48,8 +62,20 @@ aws:
     secretKey: ${S3_SECRET_KEY}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   address: 0.0.0.0
+<<<<<<< Updated upstream
+=======
+  tomcat:
+    threads:
+      max: ${TOMCAT_THREADS_MAX:250}
+      min-spare: ${TOMCAT_THREADS_MIN_SPARE:25}
+    accept-count: ${TOMCAT_ACCEPT_COUNT:1000}
+    max-connections: ${TOMCAT_MAX_CONNECTIONS:8192}
+    connection-timeout: ${TOMCAT_CONNECTION_TIMEOUT_MS:20000}
+    keep-alive-timeout: ${TOMCAT_KEEP_ALIVE_TIMEOUT_MS:60000}
+    max-keep-alive-requests: ${TOMCAT_MAX_KEEP_ALIVE_REQUESTS:100}
+>>>>>>> Stashed changes
 
 management:
   endpoints:
@@ -60,18 +86,34 @@ management:
   tracing:
     enabled: true
     sampling:
+<<<<<<< Updated upstream
       probability: 1.0
 
 #  otlp:
 #    tracing:
 #      endpoint: http://localhost:4318/v1/traces #21 대신 본인 포트로
 #      timeout=30000:
+=======
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
+    propagation:
+      propagate: tracecontext,baggage
+
+  otlp:
+    tracing:
+      endpoint: ${OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+>>>>>>> Stashed changes
 
 logging:
   level:
     org:
+<<<<<<< Updated upstream
       hibernate:
         sql: debug
+=======
+      elasticsearch.client: DEBUG
+      hibernate:
+        sql: DEBUG
+>>>>>>> Stashed changes
         type.descriptor.sql.BasicBinder: TRACE
         orm.jdbc.internal.LogicalConnectionImpl: DEBUG
       springframework.orm.jpa: DEBUG

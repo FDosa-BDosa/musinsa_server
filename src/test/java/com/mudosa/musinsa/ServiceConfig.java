@@ -1,10 +1,13 @@
 package com.mudosa.musinsa;
 
 import com.mudosa.musinsa.brand.domain.repository.BrandRepository;
+<<<<<<< Updated upstream
 import com.mudosa.musinsa.domain.chat.repository.ChatPartRepository;
 import com.mudosa.musinsa.domain.chat.repository.ChatRoomRepository;
 import com.mudosa.musinsa.domain.chat.repository.MessageAttachmentRepository;
 import com.mudosa.musinsa.domain.chat.repository.MessageRepository;
+=======
+>>>>>>> Stashed changes
 import com.mudosa.musinsa.notification.model.Notification;
 import com.mudosa.musinsa.notification.model.NotificationMetadata;
 import com.mudosa.musinsa.notification.repository.NotificationMetadataRepository;
@@ -70,19 +73,25 @@ public abstract class ServiceConfig {
   private JobRepository jobRepository;
   @MockitoBean
   protected FcmService fcmService;
+<<<<<<< Updated upstream
 
   @Autowired
   protected ChatRoomRepository chatRoomRepository;
   @Autowired
   protected ChatPartRepository chatPartRepository;
+=======
+>>>>>>> Stashed changes
   @Autowired
   protected UserRepository userRepository;
   @Autowired
   protected BrandRepository brandRepository;
+<<<<<<< Updated upstream
   @Autowired
   protected MessageRepository messageRepository;
   @Autowired
   protected MessageAttachmentRepository attachmentRepository;
+=======
+>>>>>>> Stashed changes
   @Autowired
   protected NotificationMetadataRepository notificationMetadataRepository;
   @Autowired
