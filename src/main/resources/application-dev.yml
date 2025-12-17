@@ -4,31 +4,45 @@ spring:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      # Dev default: tuned for laptop load-test without overloading local DB.
+      # Override per-machine via env vars if needed.
+      maximum-pool-size: 30
+      minimum-idle: 10
+      idle-timeout: 300000
+      max-lifetime: 1700000
+      connection-timeout: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: ${DB_POOL_LEAK_DETECT_MS:0}
+
   kafka:
     bootstrap-servers: localhost:9092
-  rabbitmq:
-    host: ${RABBIT_HOST}
-    port: 61613
-    username: guest
-    password: guest
-    listener:
-      simple:
-        concurrency: 4     # 기본 1
-        max-concurrency: 16
-        prefetch: 20
-  hikari:
-    maximum-pool-size: 70
-    minimum-idle: 10
-    idle-timeout: 600000
-    max-lifetime: 1800000
-    connection-timeout: 30000
+  # rabbitmq:
+  #   host: ${RABBIT_HOST}
+  #   port: 61613
+  #   username: guest
+  #   password: guest
+  #   listener:
+  #     simple:
+  #       concurrency: 4     # 기본 1
+  #       max-concurrency: 16
+  #       prefetch: 20
+
 
   jpa:
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
+
+  elasticsearch:
+    uris: http://localhost:9200
+#    uris: ${OPENSEARCH_SCHEME:http}://${OPENSEARCH_HOST:localhost}:${OPENSEARCH_PORT:9200}
+    connection-timeout: 5s
+    socket-timeout: 30s
+    # username: ${OPENSEARCH_USERNAME}
+    # password: ${OPENSEARCH_PASSWORD}
 
 tosspayments:
   secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
@@ -48,8 +62,17 @@ aws:
     secretKey: ${S3_SECRET_KEY}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   address: 0.0.0.0
+  tomcat:
+    threads:
+      max: ${TOMCAT_THREADS_MAX:200} # Tuned for M3 Max Concurrency
+      min-spare: ${TOMCAT_THREADS_MIN_SPARE:25}
+    accept-count: 2048
+    max-connections: ${TOMCAT_MAX_CONNECTIONS:8192}
+    connection-timeout: ${TOMCAT_CONNECTION_TIMEOUT_MS:20000}
+    keep-alive-timeout: ${TOMCAT_KEEP_ALIVE_TIMEOUT_MS:60000}
+    max-keep-alive-requests: ${TOMCAT_MAX_KEEP_ALIVE_REQUESTS:100}
 
 management:
   endpoints:
@@ -58,23 +81,25 @@ management:
         include: prometheus, health, info
 
   tracing:
-    enabled: true
+    enabled: false
     sampling:
-      probability: 1.0
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
+    propagation:
+      propagate: tracecontext,baggage
 
-#  otlp:
-#    tracing:
-#      endpoint: http://localhost:4318/v1/traces #21 대신 본인 포트로
-#      timeout=30000:
+  otlp:
+    tracing:
+      endpoint: ${OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
 
 logging:
   level:
     org:
+      elasticsearch.client: ERROR
       hibernate:
-        sql: debug
+        sql: ERROR
         type.descriptor.sql.BasicBinder: TRACE
-        orm.jdbc.internal.LogicalConnectionImpl: DEBUG
-      springframework.orm.jpa: DEBUG
-      springframework.transaction: DEBUG
-      springframework.web.client.RestTemplate: DEBUG
-      com.mudosa.musinsa.common.client: DEBUG
+        orm.jdbc.internal.LogicalConnectionImpl: ERROR
+      springframework.orm.jpa: ERROR
+      springframework.transaction: ERROR
+      springframework.web.client.RestTemplate: ERROR
+      com.mudosa.musinsa.common.client: ERROR

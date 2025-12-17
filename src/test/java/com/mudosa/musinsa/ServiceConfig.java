@@ -1,10 +1,6 @@
 package com.mudosa.musinsa;
 
 import com.mudosa.musinsa.brand.domain.repository.BrandRepository;
-import com.mudosa.musinsa.domain.chat.repository.ChatPartRepository;
-import com.mudosa.musinsa.domain.chat.repository.ChatRoomRepository;
-import com.mudosa.musinsa.domain.chat.repository.MessageAttachmentRepository;
-import com.mudosa.musinsa.domain.chat.repository.MessageRepository;
 import com.mudosa.musinsa.notification.model.Notification;
 import com.mudosa.musinsa.notification.model.NotificationMetadata;
 import com.mudosa.musinsa.notification.repository.NotificationMetadataRepository;
@@ -32,74 +28,61 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 // 공통 테스트 설정 분리
 @Slf4j
 @ActiveProfiles("test")
-@SpringBootTest(
-    classes = ServerApplication.class,
-    properties = {
-        "spring.main.allow-bean-definition-overriding=true",
-    }
-)
+@SpringBootTest(classes = ServerApplication.class, properties = {
+                "spring.main.allow-bean-definition-overriding=true",
+})
 @ImportAutoConfiguration(exclude = {
-    MybatisAutoConfiguration.class,
-    org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration.class
+                MybatisAutoConfiguration.class,
+                org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration.class
 })
 public abstract class ServiceConfig {
 
-  @MockitoBean
-  private JwtTokenProvider jwtTokenProvider;
+        @MockitoBean
+        private JwtTokenProvider jwtTokenProvider;
 
-  /**
-   * 배치 문제 해결을 위한 임시 조치
-   */
-  @MockitoBean
-  private SettlementDailyMapper settlementDailyMapper;
-  @MockitoBean
-  private SettlementMonthlyMapper settlementMonthlyMapper;
-  @MockitoBean
-  private SettlementPerTransactionMapper settlementPerTransactionMapper;
+        /**
+         * 배치 문제 해결을 위한 임시 조치
+         */
+        @MockitoBean
+        private SettlementDailyMapper settlementDailyMapper;
+        @MockitoBean
+        private SettlementMonthlyMapper settlementMonthlyMapper;
+        @MockitoBean
+        private SettlementPerTransactionMapper settlementPerTransactionMapper;
 
-  @MockitoBean
-  private SettlementBatchScheduler settlementBatchScheduler;
-  @MockitoBean
-  private DailySettlementAggregationJob dailySettlementAggregationJob;
-  @MockitoBean
-  private MonthlySettlementAggregationJob monthlySettlementAggregationJob;
-  @MockitoBean
-  private WeeklySettlementAggregationJob weeklySettlementAggregationJob;
+        @MockitoBean
+        private SettlementBatchScheduler settlementBatchScheduler;
+        @MockitoBean
+        private DailySettlementAggregationJob dailySettlementAggregationJob;
+        @MockitoBean
+        private MonthlySettlementAggregationJob monthlySettlementAggregationJob;
+        @MockitoBean
+        private WeeklySettlementAggregationJob weeklySettlementAggregationJob;
 
-  @MockitoBean
-  private JobRepository jobRepository;
-  @MockitoBean
-  protected FcmService fcmService;
+        @MockitoBean
+        private JobRepository jobRepository;
+        @MockitoBean
+        protected FcmService fcmService;
+        @Autowired
+        protected UserRepository userRepository;
+        @Autowired
+        protected BrandRepository brandRepository;
+        @Autowired
+        protected NotificationMetadataRepository notificationMetadataRepository;
+        @Autowired
+        protected NotificationRepository notificationRepository;
 
-  @Autowired
-  protected ChatRoomRepository chatRoomRepository;
-  @Autowired
-  protected ChatPartRepository chatPartRepository;
-  @Autowired
-  protected UserRepository userRepository;
-  @Autowired
-  protected BrandRepository brandRepository;
-  @Autowired
-  protected MessageRepository messageRepository;
-  @Autowired
-  protected MessageAttachmentRepository attachmentRepository;
-  @Autowired
-  protected NotificationMetadataRepository notificationMetadataRepository;
-  @Autowired
-  protected NotificationRepository notificationRepository;
+        protected NotificationMetadata saveNotificationMetadata(String notificationCategory) {
+                return notificationMetadataRepository.save(
+                                NotificationMetadata.builder()
+                                                .notificationCategory(notificationCategory)
+                                                .build());
+        }
 
-  protected NotificationMetadata saveNotificationMetadata(String notificationCategory) {
-      return notificationMetadataRepository.save(
-              NotificationMetadata.builder()
-                      .notificationCategory(notificationCategory)
-                      .build()
-      );
-  }
-
-  protected Notification saveNotification(User user, NotificationMetadata notificationMetadata){
-      return notificationRepository.save(Notification.builder()
-              .user(user)
-              .notificationMetadata(notificationMetadata)
-              .build());
-  }
+        protected Notification saveNotification(User user, NotificationMetadata notificationMetadata) {
+                return notificationRepository.save(Notification.builder()
+                                .user(user)
+                                .notificationMetadata(notificationMetadata)
+                                .build());
+        }
 }
