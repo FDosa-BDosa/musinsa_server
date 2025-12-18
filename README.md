@@ -9,4 +9,11 @@
 |`팀장`, <br>`정산`|`채팅`|`이벤트`|`주문/결제`, <br>`배포`|`상품`|`알림`|
 
 # 기술스택
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b6291c44-287d-4344-a9e6-9ed902c4ccad" />
+<p align="center">
+<img width="827" height="465" alt="image" src="https://github.com/user-attachments/assets/b6291c44-287d-4344-a9e6-9ed902c4ccad" />
+</p>
+
+# 아키텍처
+<p align="center">
+<img width="650" height="615" alt="image" src="https://github.com/user-attachments/assets/7b349d64-5ab0-4cf8-930d-945ca457963a" />
+</p>
